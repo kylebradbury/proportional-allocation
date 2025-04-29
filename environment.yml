@@ -1,0 +1,23 @@
+name: ds_stack
+channels:
+  - default
+  - conda-forge
+  - h2oai
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - pip
+  - scipy
+  - matplotlib
+  - seaborn
+  - pep8
+  - scikit-learn
+  - scikit-image
+  - jupyter
+  - ipykernel
+  - ipython
+  - fastparquet
+  - ipywidgets
+  - pip:
+      - statsmodels
