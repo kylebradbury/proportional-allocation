@@ -19,5 +19,6 @@ dependencies:
   - ipython
   - fastparquet
   - ipywidgets
+  - pytest
   - pip:
       - statsmodels
