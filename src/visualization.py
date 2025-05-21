@@ -55,7 +55,7 @@ def plot_simulation_results(dg, dp, results):
     plt.tight_layout()
     plt.show()
 
-def plot_simulation_results_ratio(dp, dg, results):
+def plot_simulation_results_ratio(dg, dp, results):
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
     ax[0].semilogx(dp/dg, results['mean_estimate_centroid'], label='Centroid Allocation', color='blue')
     ax[0].semilogx(dp/dg, results['mean_estimate_proportional'], label='Proportional Allocation', color='orange')
@@ -89,7 +89,7 @@ def plot_simulation_error_ratios(dg, dp, results):
     plt.tight_layout()
     plt.show()
 
-def plot_simulation_error_ratios_multiple(dp, dg, results, names):
+def plot_simulation_error_ratios_multiple(dg, dp, results, names):
     fig, ax = plt.subplots(figsize=(6, 6))
     for i, result in enumerate(results):
         ax.loglog(dp/dg, np.array(result['mean_mape_centroid']) / np.array(result['mean_mape_proportional']), 
