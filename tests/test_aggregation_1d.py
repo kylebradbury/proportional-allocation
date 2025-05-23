@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from aggregation import (
+from aggregation_1d import (
     get_actual_value,
     proportional_allocation_estimate,
     centroid_allocation_estimate

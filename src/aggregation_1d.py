@@ -16,12 +16,12 @@ def create_gridded_data(data, grid_size, start=0, end=1):
     """
     if start < 0:
         neg_bins = np.arange(start, 0, grid_size)
-        pos_bins = np.arange(0, end, grid_size)  # Create bins from 0 to end
+        pos_bins = np.arange(0, end+grid_size, grid_size)  # Create bins from 0 to end
         bins = np.concatenate((neg_bins, pos_bins))  # Combine negative and positive bins
     elif grid_size > end - start:
         bins = np.array([start, end])  # Create a single bin from start to end
     else:
-        bins = np.arange(start, end, grid_size)  # Create bins from 0 to 1 with specified grid size
+        bins = np.arange(start, end+grid_size, grid_size)  # Create bins from 0 to 1 with specified grid size
     hist, bin_edges = np.histogram(data, bins=bins)
     return hist, bin_edges
 
@@ -32,7 +32,7 @@ def create_gridded_data_random_origin(data, grid_size, start=0, end=1, range_of_
     origin = np.random.uniform(0, range_of_variation)
     
     neg_bins = np.arange(start, origin, grid_size)
-    pos_bins = np.arange(origin, end, grid_size)  # Create bins from 0 to end
+    pos_bins = np.arange(origin, end+grid_size, grid_size)  # Create bins from 0 to end
     bins = np.concatenate((neg_bins, pos_bins))  # Combine negative and positive bins
     hist, bin_edges = np.histogram(data, bins=bins)
     return hist, bin_edges

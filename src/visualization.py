@@ -32,6 +32,20 @@ def plot_one_d_samples(samples, title):
     
     plt.subplots_adjust(hspace=0)
     
+def plot_two_d_samples(samples, title):
+    """
+    Plot two-dimensional samples.
+    """
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.scatter(samples[:, 0], samples[:, 1], marker='.', facecolor='black', edgecolor='black')
+    ax.set(
+        title=title,
+        xlabel='X-axis',
+        ylabel='Y-axis',
+    )
+    plt.show()
+
+    
 def plot_simulation_results(dg, dp, results):
     fig, ax = plt.subplots(1, 3, figsize=(18, 6))
     ax[0].plot(dg, results['mean_estimate_centroid'], label='Centroid Allocation', color='blue')
