@@ -117,3 +117,16 @@ def plot_simulation_error_ratios_multiple(dg, dp, results, names):
     plt.tight_layout()
     plt.show()
     
+def plot_simulation_error_ratios_multiple_2d(dg, dp, results, names):
+    fig, ax = plt.subplots(figsize=(6, 6))
+    for i, result in enumerate(results):
+        ax.loglog((dp**2)/(dg**2), np.array(result['mean_mape_centroid']) / np.array(result['mean_mape_proportional']), 
+                  label=f'MAPE Ratio - {names[i]}', 
+                  linewidth=0.5)
+    ax.loglog((dp**2)/(dg**2), np.ones(len(dg)), label='Equal Performance', color='darkgray', linestyle='--')
+    ax.set_title('Allocation MAPE Ratio - Centroid:Proportional Allocation')
+    ax.set_xlabel('Polygon:Grid Size Ratio (By Area)')
+    ax.set_ylabel('MAPE')
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
