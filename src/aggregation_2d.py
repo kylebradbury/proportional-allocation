@@ -64,46 +64,49 @@ def centroid_allocation_estimate_2d(count, edges_x, edges_y, polygon_x, polygon_
     
     return np.sum(count[np.ix_(centersx_included, centersy_included)])
 
+def get_fraction_of_polygon_in_cell(width, centers, polygon):
+    """
+    Get the fraction of the polygon that lies within the cell.
+    """
+    start = centers - width/2
+    end = centers + width/2
+
+    polygon_start = polygon[0]
+    polygon_end = polygon[1]
+    
+    fraction = np.zeros_like(centers)
+
+    outside_polygon = (start >= polygon_end) | (end <= polygon_start)
+    inside_polygon = (start >= polygon_start) & (end <= polygon_end)
+    partially_inside_polygon = np.logical_not(outside_polygon) & np.logical_not(inside_polygon)
+
+    fraction[inside_polygon] = 1.0
+    starting_difference = end[partially_inside_polygon] - polygon_start
+    ending_difference = polygon_end - start[partially_inside_polygon]
+    valid_start = (starting_difference >= 0) & (starting_difference < width)
+    # valid_end = (ending_difference >= 0) & (ending_difference < width)
+
+    fraction[partially_inside_polygon] = np.where(valid_start, starting_difference / width, ending_difference / width)
+
+    return fraction
+
 # Estimate the value using proportional allocation
 def proportional_allocation_estimate_2d(count, edges_x, edges_y, polygon_x, polygon_y):
     """
     Estimate the value using proportional allocation.
     """
-    grid_diameter_x = (edges_x[1] - edges_x[0])/2
-    grid_diameter_y = (edges_y[1] - edges_y[0])/2
-    
+    grid_width_x = (edges_x[1] - edges_x[0])
+    grid_width_y = (edges_y[1] - edges_y[0])
+
     centersx = (edges_x[:-1] + edges_x[1:]) / 2
     centersy = (edges_y[:-1] + edges_y[1:]) / 2
     
     # Get fraction of each cell that lies within the polygon
-    fraction_x = 
+    fraction_x = get_fraction_of_polygon_in_cell(grid_width_x, centersx, polygon_x)
+    fraction_y = get_fraction_of_polygon_in_cell(grid_width_y, centersy, polygon_y)
 
-    polygon_begins_before_first_edge = polygon_x[0] <= begin_edges
-    polygon_ends_after_last_edge = polygon_x[1] >= end_edges
-
-    grid_cell_contains_polygon_start = (begin_edges < polygon_x[0]) & (end_edges > polygon_x[0])
-    grid_cell_contains_polygon_end = (begin_edges < polygon_x[1]) & (end_edges > polygon_x[1])
-
-    # Determine the grid cells that lie fully within the polygon
-    fully_within = (polygon_begins_before_first_edge) & (polygon_ends_after_last_edge)
-
-    # and the grid cells that are partially within the polygon
-    partially_within = (grid_cell_contains_polygon_start | grid_cell_contains_polygon_end) & ~fully_within
+    # Calculate the fraction of the polygon that lies within each grid cell
+    fraction = np.outer(fraction_x, fraction_y)
 
     # Sum the counts of the fully within cells
-    estimate = np.sum(count[fully_within])
-    
-    # For the partially within cells, we need to calculate the fraction of the polygon that lies within the grid cell
-    edge_starts = begin_edges[partially_within]
-    edge_ends = end_edges[partially_within]
-    count_partial = count[partially_within]
-    for i,edge in enumerate(edge_starts):
-        # Calculate the fraction of the grid cell that lies within the polygon
-        if edge_starts[i] < polygon_start:
-            fraction = (edge_ends[i] - polygon_start) / grid_width
-        elif edge_ends[i] > polygon_end:
-            fraction = (polygon_end - edge_starts[i]) / grid_width
-        else:
-            fraction = 1.0
-        estimate += count_partial[i] * fraction
-    return estimate
+    return np.sum(fraction * count)

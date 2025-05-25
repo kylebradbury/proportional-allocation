@@ -1,14 +1,14 @@
 from tqdm import tqdm
 import numpy as np
-from src.aggregation_1d import (
-    create_gridded_data, 
-    create_gridded_data_random_origin,
-    get_actual_value, 
-    centroid_allocation_estimate, 
-    proportional_allocation_estimate
+from src.aggregation_2d import (
+    create_gridded_data_origin_0_2d, 
+    create_gridded_data_2d,
+    get_actual_value_2d, 
+    centroid_allocation_estimate_2d, 
+    proportional_allocation_estimate_2d,
 )
 
-def run_simulation_fixed_edge(rate, start, end, trials, dg, dp, point_process):
+def run_simulation_fixed_edge_2d(rate, x_range, y_range, trials, dg, dp, point_process):
     """
     Run a simulation to compare the performance of centroid and proportional allocation estimates.
     
@@ -36,12 +36,15 @@ def run_simulation_fixed_edge(rate, start, end, trials, dg, dp, point_process):
         mape_centroid = []
         mape_proportional = []
         
+        polygon_x_range = (0, polygon_width)
+        polygon_y_range = (0, polygon_width)
+        
         for _ in range(trials):
-            data = point_process(rate, start, end)
-            count, edges = create_gridded_data(data, grid_width, 0, 1)
-            actual_value = get_actual_value(data, 0, polygon_width)
-            estimate_centroid = centroid_allocation_estimate(count, edges, 0, polygon_width)
-            estimate_proportional = proportional_allocation_estimate(count, edges, 0, polygon_width)
+            data = point_process(rate, x_range, y_range)
+            count, edgesx, edgesy = create_gridded_data_2d(data, grid_width, x_range=x_range, y_range=y_range)
+            actual_value = get_actual_value_2d(data, polygon_x_range, polygon_y_range)
+            estimate_centroid = centroid_allocation_estimate_2d(count, edgesx, edgesy, polygon_x_range, polygon_y_range)
+            estimate_proportional = proportional_allocation_estimate_2d(count, edgesx, edgesy, polygon_x_range, polygon_y_range)
             errors_centroid.append(estimate_centroid - actual_value)
             errors_proportional.append(estimate_proportional - actual_value)
             if actual_value != 0:
@@ -65,14 +68,14 @@ def run_simulation_fixed_edge(rate, start, end, trials, dg, dp, point_process):
         'mean_mape_proportional': mean_mape_proportional
     }
 
-def run_simulation_random_polygon_placement(rate, start, end, trials, dg, dp, point_process):
+def run_simulation_random_polygon_placement_2d(rate, x_range, y_range, trials, dg, dp, point_process):
     """
     Run a simulation to compare the performance of centroid and proportional allocation estimates.
     
     Parameters:
     - rate: Intensity of the point process
-    - start: Start of the interval to generate points
-    - end: End of the interval to generate points
+    - x_range: Range of x values
+    - y_range: Range of y values
     - trials: Number of trials to run
     - dg: List of grid cell widths
     - dp: Polygon width
@@ -95,15 +98,19 @@ def run_simulation_random_polygon_placement(rate, start, end, trials, dg, dp, po
         
         for _ in range(trials):
             # Generate polygon
-            polygon_start = np.random.uniform(low=-1, high=2)
-            polygon_end = polygon_start + polygon_width
             
-            data = point_process(rate, start, end)
-            count, edges = create_gridded_data(data, grid_width, start, end)
-            actual_value = get_actual_value(data, polygon_start, polygon_end)
+            polygon_start_x_offset = np.random.uniform(low=-1, high=0)
+            polygon_start_y_offset = np.random.uniform(low=-1, high=0)
+            
+            polygon_x_range = (polygon_start_x_offset, polygon_width + polygon_start_x_offset)
+            polygon_y_range = (polygon_start_y_offset, polygon_width + polygon_start_y_offset)
+            
+            data = point_process(rate, x_range, y_range)
+            count, xedges, yedges = create_gridded_data_2d(data, grid_width, x_range, y_range)
+            actual_value = get_actual_value_2d(data, polygon_x_range, polygon_y_range)
 
-            estimate_centroid = centroid_allocation_estimate(count, edges, polygon_start, polygon_end)
-            estimate_proportional = proportional_allocation_estimate(count, edges, polygon_start, polygon_end)
+            estimate_centroid = centroid_allocation_estimate_2d(count, xedges, yedges, polygon_x_range, polygon_y_range)
+            estimate_proportional = proportional_allocation_estimate_2d(count, xedges, yedges, polygon_x_range, polygon_y_range)
             errors_centroid.append(estimate_centroid - actual_value)
             errors_proportional.append(estimate_proportional - actual_value)
             if actual_value != 0:
@@ -126,15 +133,15 @@ def run_simulation_random_polygon_placement(rate, start, end, trials, dg, dp, po
         'mean_mape_centroid': mean_mape_centroid,
         'mean_mape_proportional': mean_mape_proportional
     }
-    
-def run_simulation_random_polygon_placement_and_grid_origin(rate, start, end, trials, dg, dp, point_process):
+
+def run_simulation_random_polygon_placement_and_grid_origin_2d(rate, x_range, y_range, trials, dg, dp, point_process):
     """
     Run a simulation to compare the performance of centroid and proportional allocation estimates.
     
     Parameters:
     - rate: Intensity of the point process
-    - start: Start of the interval to generate points
-    - end: End of the interval to generate points
+    - x_range: Range of x values
+    - y_range: Range of y values
     - trials: Number of trials to run
     - dg: List of grid cell widths
     - dp: Polygon width
@@ -157,15 +164,18 @@ def run_simulation_random_polygon_placement_and_grid_origin(rate, start, end, tr
         
         for _ in range(trials):
             # Generate polygon
-            polygon_start = np.random.uniform(low=-1, high=2)
-            polygon_end = polygon_start + polygon_width
+            polygon_start_x_offset = np.random.uniform(low=-1, high=0)
+            polygon_start_y_offset = np.random.uniform(low=-1, high=0)
             
-            data = point_process(rate, start, end)
-            count, edges = create_gridded_data_random_origin(data, grid_width, start, end, range_of_variation=polygon_width)
-            actual_value = get_actual_value(data, polygon_start, polygon_end)
+            polygon_x_range = (polygon_start_x_offset, polygon_width + polygon_start_x_offset)
+            polygon_y_range = (polygon_start_y_offset, polygon_width + polygon_start_y_offset)
+            
+            data = point_process(rate, x_range, y_range)
+            count, xedges, yedges = create_gridded_data_2d(data, grid_width, x_range, y_range, range_of_variation=polygon_width)
+            actual_value = get_actual_value_2d(data, polygon_x_range, polygon_y_range)
 
-            estimate_centroid = centroid_allocation_estimate(count, edges, polygon_start, polygon_end)
-            estimate_proportional = proportional_allocation_estimate(count, edges, polygon_start, polygon_end)
+            estimate_centroid = centroid_allocation_estimate_2d(count, xedges, yedges, polygon_x_range, polygon_y_range)
+            estimate_proportional = proportional_allocation_estimate_2d(count, xedges, yedges, polygon_x_range, polygon_y_range)
             errors_centroid.append(estimate_centroid - actual_value)
             errors_proportional.append(estimate_proportional - actual_value)
             if actual_value != 0:
